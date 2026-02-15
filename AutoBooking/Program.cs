@@ -3,7 +3,7 @@ using Microsoft.Playwright;
 
 var username = Environment.GetEnvironmentVariable("WONDR_USERNAME");
 var password = Environment.GetEnvironmentVariable("WONDR_PASSWORD");
-var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "07:30";
+var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "06:30";
 var bookingUrl = Environment.GetEnvironmentVariable("BOOKING_URL") ?? "https://playtrening.wondr.cc/schema";
 var bookingLocation = Environment.GetEnvironmentVariable("BOOKING_LOCATION") ?? "Play Gamlebyen";
 
