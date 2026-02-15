@@ -1,0 +1,29 @@
+name: AutoBooking
+
+on:
+  schedule:
+    - cron: '0 11 * * *' # 12:00 CET (11:00 UTC)
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  book:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Playwright browsers
+        run: dotnet build AutoBooking/AutoBooking.csproj && npx playwright install chromium --with-deps
+
+      - name: Run booking
+        run: dotnet run --project AutoBooking/AutoBooking.csproj
+        env:
+          WONDR_USERNAME: ${{ secrets.WONDR_USERNAME }}
+          WONDR_PASSWORD: ${{ secrets.WONDR_PASSWORD }}
+          BOOKING_TIME: ${{ vars.BOOKING_TIME || '07:30' }}
+          BOOKING_URL: ${{ vars.BOOKING_URL || 'https://playtrening.wondr.cc/schema' }}
+          BOOKING_LOCATION: ${{ vars.BOOKING_LOCATION || 'Play Gamlebyen' }}
