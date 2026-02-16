@@ -3,7 +3,7 @@ using Microsoft.Playwright;
 
 var username = Environment.GetEnvironmentVariable("WONDR_USERNAME");
 var password = Environment.GetEnvironmentVariable("WONDR_PASSWORD");
-var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "06:30";
+var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "16:00";
 var bookingUrl = Environment.GetEnvironmentVariable("BOOKING_URL") ?? "https://playtrening.wondr.cc/schema";
 var bookingLocation = Environment.GetEnvironmentVariable("BOOKING_LOCATION") ?? "Play Gamlebyen";
 
@@ -13,7 +13,7 @@ if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
     return 1;
 }
 
-var targetDate = DateTime.Now.AddDays(4);
+var targetDate = DateTime.Now.AddDays(3);
 Console.WriteLine($"Booking class at {bookingTime} on {targetDate:yyyy-MM-dd}");
 
 using var playwright = await Playwright.CreateAsync();
