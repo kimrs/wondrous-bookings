@@ -101,7 +101,7 @@ public class BookingService
         Console.WriteLine("Schedule loaded with activities.");
     }
 
-    public static async Task BookClassAsync(IPage page, string time, DateTime targetDate)
+    public static async Task BookClassAsync(IPage page, string time, DateTime targetDate, string? className = null)
     {
         // The schedule is a scrollable list showing multiple days.
         // Times are displayed without leading zeros (e.g. "7:30" not "07:30").
@@ -148,7 +148,7 @@ public class BookingService
         // Strategy: use JavaScript to find schedule-list-row elements that appear
         // after the target day header and before the next day header.
         var targetRowJs = await page.EvaluateAsync<int?>(@"(args) => {
-            const { dayText, displayTime } = args;
+            const { dayText, displayTime, className } = args;
             const headers = document.querySelectorAll('h4.schedule-list-day-text');
             let targetHeader = null;
             for (const h of headers) {
@@ -182,14 +182,22 @@ public class BookingService
 
                 const timeEl = row.querySelector('.schedule-list-row-header-item.time');
                 if (!timeEl) continue;
-                const timeText = timeEl.textContent;
-                if (!timeText.includes(displayTime)) continue;
+                const timeText = timeEl.textContent.trim();
+                const startTime = timeText.split('-')[0].trim();
+                if (startTime !== displayTime) continue;
+
+                // Filter by class name if specified
+                if (className) {
+                    const nameEl = row.querySelector('.schedule-list-row-header-item.name, .schedule-list-row-header-item.activity-name');
+                    const rowName = nameEl ? nameEl.textContent.trim() : row.textContent;
+                    if (!rowName.toLowerCase().includes(className.toLowerCase())) continue;
+                }
 
                 const bookeBtn = row.querySelector('button');
-                if (bookeBtn && bookeBtn.textContent.trim() === 'Booke') return i;
+                if (bookeBtn && (bookeBtn.textContent.trim() === 'Booke' || bookeBtn.textContent.trim() === 'Venteliste')) return i;
             }
             return null;
-        }", new { dayText, displayTime });
+        }", new { dayText, displayTime, className });
 
         if (targetRowJs == null)
             throw new Exception($"Could not find a bookable class at {displayTime} on {targetDate:yyyy-MM-dd}");
@@ -201,11 +209,24 @@ public class BookingService
         if (targetRow == null)
             throw new Exception($"Could not find a bookable class at {displayTime} on {targetDate:yyyy-MM-dd}");
 
-        // Click the "Booke" button on the target row
-        var bookButton = targetRow.Locator("button:has-text('Booke')");
-        await bookButton.ScrollIntoViewIfNeededAsync();
-        Console.WriteLine("Clicking Booke button...");
-        await bookButton.ClickAsync();
+        // Check if the button says "Venteliste" (waiting list) or "Booke"
+        var waitlistButton = targetRow.Locator("button:has-text('Venteliste')");
+        var isWaitlist = await IsVisibleWithinAsync(waitlistButton, 2_000);
+
+        if (isWaitlist)
+        {
+            Console.WriteLine("Class is full. Joining waiting list...");
+            await waitlistButton.ScrollIntoViewIfNeededAsync();
+            Console.WriteLine("Clicking Venteliste button...");
+            await waitlistButton.ClickAsync();
+        }
+        else
+        {
+            var bookButton = targetRow.Locator("button:has-text('Booke')");
+            await bookButton.ScrollIntoViewIfNeededAsync();
+            Console.WriteLine("Clicking Booke button...");
+            await bookButton.ClickAsync();
+        }
 
         // A floating confirmation dialog appears with another "Booke" button
         await page.WaitForTimeoutAsync(2_000);

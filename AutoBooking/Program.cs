@@ -3,9 +3,10 @@ using Microsoft.Playwright;
 
 var username = Environment.GetEnvironmentVariable("WONDR_USERNAME");
 var password = Environment.GetEnvironmentVariable("WONDR_PASSWORD");
-var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "16:00";
+var bookingTime = Environment.GetEnvironmentVariable("BOOKING_TIME") ?? "06:30";
 var bookingUrl = Environment.GetEnvironmentVariable("BOOKING_URL") ?? "https://playtrening.wondr.cc/schema";
 var bookingLocation = Environment.GetEnvironmentVariable("BOOKING_LOCATION") ?? "Play Gamlebyen";
+var bookingClassName = Environment.GetEnvironmentVariable("BOOKING_CLASS_NAME") ?? "PLAY WOD";
 
 if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
 {
@@ -13,7 +14,7 @@ if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
     return 1;
 }
 
-var targetDate = DateTime.Now.AddDays(3);
+var targetDate = DateTime.Now.AddDays(4);
 Console.WriteLine($"Booking class at {bookingTime} on {targetDate:yyyy-MM-dd}");
 
 using var playwright = await Playwright.CreateAsync();
@@ -32,7 +33,7 @@ try
     await BookingService.NavigateToDateAsync(page, bookingUrl, bookingLocation, targetDate);
     Console.WriteLine($"Navigated to {targetDate:yyyy-MM-dd}.");
 
-    await BookingService.BookClassAsync(page, bookingTime, targetDate);
+    await BookingService.BookClassAsync(page, bookingTime, targetDate, bookingClassName);
     Console.WriteLine($"Successfully booked class at {bookingTime} on {targetDate:yyyy-MM-dd}!");
     return 0;
 }
