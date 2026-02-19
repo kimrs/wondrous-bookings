@@ -2,7 +2,7 @@ name: AutoBooking
 
 on:
   schedule:
-    - cron: '52 10 * * *' # 12:00 CET (11:00 UTC)
+    - cron: '50 10 * * *' # 12:00 CET (11:00 UTC)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -27,6 +27,6 @@ jobs:
         env:
           WONDR_USERNAME: ${{ secrets.WONDR_USERNAME }}
           WONDR_PASSWORD: ${{ secrets.WONDR_PASSWORD }}
-          BOOKING_TIME: ${{ vars.BOOKING_TIME || '07:30' }}
+          BOOKING_TIME: ${{ vars.BOOKING_TIME || '06:30' }}
           BOOKING_URL: ${{ vars.BOOKING_URL || 'https://playtrening.wondr.cc/schema' }}
           BOOKING_LOCATION: ${{ vars.BOOKING_LOCATION || 'Play Gamlebyen' }}
